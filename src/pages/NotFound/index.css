@@ -1,0 +1,83 @@
+.not-found-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #4caf50, #81c784);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.not-found-card {
+  background: #ffffff;
+  padding: 50px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.error-code {
+  font-size: 100px;
+  color: #2e7d32;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.error-heading {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.error-description {
+  color: #666;
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.home-btn {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.home-btn:hover {
+  background-color: #1b5e20;
+}
+
+.home-icon {
+  font-size: 18px;
+}
+
+@media screen and (max-width: 576px) {
+  .not-found-card {
+    padding: 30px 20px;
+  }
+
+  .error-code {
+    font-size: 70px;
+  }
+
+  .error-heading {
+    font-size: 24px;
+  }
+
+  .error-description {
+    font-size: 16px;
+  }
+
+  .home-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

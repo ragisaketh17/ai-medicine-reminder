@@ -1,0 +1,17 @@
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: #1b5e20;
+  padding-top: 30px;
+}
+
+.sidebar a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  padding: 15px 20px;
+}
+
+.sidebar a:hover {
+  background: #2e7d32;
+}

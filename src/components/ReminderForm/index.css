@@ -1,0 +1,16 @@
+.reminder-form {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.reminder-form input {
+  padding: 10px;
+}
+
+.reminder-form button {
+  background: #2e7d32;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+}
