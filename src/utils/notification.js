@@ -14,7 +14,6 @@ export const showNotification = medicine => {
   if (Notification.permission === 'granted') {
     new Notification('💊 Medicine Reminder', {
       body: `Time to take ${medicine.name}\nDosage: ${medicine.dosage}`,
-      icon: '/logo192.png',
     })
   }
 }
