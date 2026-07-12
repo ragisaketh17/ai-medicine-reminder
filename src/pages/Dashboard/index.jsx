@@ -1,7 +1,5 @@
 import {useEffect, useState} from 'react'
 import {Link} from 'react-router-dom'
-import Navbar from '../../components/Navbar'
-
 import {
   FaPills,
   FaBell,
@@ -16,34 +14,22 @@ import './index.css'
 const Dashboard = () => {
   const [medicines, setMedicines] = useState([])
 
-  useEffect(() => {
-    const loggedInUser = localStorage.getItem('loggedInUser')
+  const loggedInUser = localStorage.getItem('loggedInUser')
 
+  const loadMedicines = () => {
     const medicineList =
       JSON.parse(
         localStorage.getItem(`medicines_${loggedInUser}`),
       ) || []
 
     setMedicines(medicineList)
+  }
+
+  useEffect(() => {
+    loadMedicines()
   }, [])
 
   useEffect(() => {
-  const interval = setInterval(() => {
-    const loggedInUser = localStorage.getItem('loggedInUser')
-
-    if (!loggedInUser) return
-
-    const medicineList =
-      JSON.parse(
-        localStorage.getItem(`medicines_${loggedInUser}`)
-      ) || []
-
-    const now = new Date()
-    const currentMinutes =
-      now.getHours() * 60 + now.getMinutes()
-
-    let updated = false
-
     const convertToMinutes = time => {
       const [clock, period] = time.split(' ')
       let [hour, minute] = clock.split(':').map(Number)
@@ -54,86 +40,93 @@ const Dashboard = () => {
       return hour * 60 + minute
     }
 
-    medicineList.forEach(each => {
-  const medicineMinutes = convertToMinutes(each.time)
+    const interval = setInterval(() => {
+      const medicineList =
+        JSON.parse(
+          localStorage.getItem(`medicines_${loggedInUser}`),
+        ) || []
 
-  console.log("Current Minutes:", currentMinutes)
-  console.log("Medicine:", each.name)
-  console.log("Medicine Minutes:", medicineMinutes)
-  console.log("Status:", each.status)
+      const now = new Date()
+      const currentMinutes =
+        now.getHours() * 60 + now.getMinutes()
 
-  if (
-    currentMinutes >= medicineMinutes &&
-    each.status === 'Pending'
-  ) {
-    console.log("Reminder triggered for:", each.name)
+      let changed = false
 
-    if (!each.reminderStartedAt) {
-      each.reminderStartedAt = Date.now()
-      each.reminderCount = 0
-      each.lastReminder = -1
-      updated = true
-    }
+      medicineList.forEach(each => {
+        if (each.status === 'Taken') {
+          return
+        }
 
-    const elapsed = Date.now() - each.reminderStartedAt
+        const medicineMinutes = convertToMinutes(each.time)
 
-    if (elapsed <= 60000) {
-      const reminderIndex = Math.floor(elapsed / 6000)
+        if (currentMinutes >= medicineMinutes) {
+          if (!each.reminderStartedAt) {
+            each.reminderStartedAt = Date.now()
+            each.reminderCount = 0
+            changed = true
+          }
 
-      if (
-        reminderIndex > each.lastReminder &&
-        each.reminderCount < 10
-      ) {
-        console.log("Reminder sent", each.name)
-        showNotification(each)
+          const elapsed =
+            Date.now() - each.reminderStartedAt
 
-        each.reminderCount += 1
-        each.lastReminder = reminderIndex
+          if (
+            elapsed <= 60000 &&
+            each.reminderCount < 10
+          ) {
+            const nextReminder =
+              each.reminderCount * 6000
 
-        updated = true
+            if (elapsed >= nextReminder) {
+              showNotification(each)
+
+              console.log(
+                'Reminder:',
+                each.name,
+                each.reminderCount + 1,
+              )
+
+              each.reminderCount += 1
+              changed = true
+            }
+          }
+        }
+      })
+
+      if (changed) {
+        localStorage.setItem(
+          `medicines_${loggedInUser}`,
+          JSON.stringify(medicineList),
+        )
+
+        setMedicines([...medicineList])
       }
-    }
-  }
-})
-if (updated) {
-  localStorage.setItem(
-    `medicines_${loggedInUser}`,
-    JSON.stringify(medicineList)
-  )
+    }, 1000)
 
-  setMedicines([...medicineList])
-}
-}, 1000) // Check every second
-
-return () => clearInterval(interval)
-}, [])
+    return () => clearInterval(interval)
+  }, [loggedInUser])
 
   const onClickTaken = id => {
-  const loggedInUser = localStorage.getItem('loggedInUser')
+    const medicineList =
+      JSON.parse(
+        localStorage.getItem(`medicines_${loggedInUser}`),
+      ) || []
 
-  const medicineList =
-    JSON.parse(
-      localStorage.getItem(`medicines_${loggedInUser}`)
-    ) || []
+    const updatedMedicines = medicineList.map(each =>
+      each.id === id
+        ? {
+            ...each,
+            status: 'Taken',
+          }
+        : each,
+    )
 
-  const updatedMedicines = medicineList.map(each => {
-    if (each.id === id) {
-      return {
-        ...each,
-        status: 'Taken',
-      }
-    }
+    localStorage.setItem(
+      `medicines_${loggedInUser}`,
+      JSON.stringify(updatedMedicines),
+    )
 
-    return each
-  })
-
-  localStorage.setItem(
-    `medicines_${loggedInUser}`,
-    JSON.stringify(updatedMedicines)
-  )
-
-  setMedicines(updatedMedicines)
-}
+    setMedicines(updatedMedicines)
+  }
 
   return (
     <div className="dashboard-container">
@@ -141,8 +134,8 @@ return () => clearInterval(interval)
         <h1>Medicine Reminder Dashboard</h1>
 
         <p>
-          Welcome back! Stay healthy and never miss your
-          medicines.
+          Welcome back! Stay healthy and never miss
+          your medicines.
         </p>
       </div>
 
@@ -158,17 +151,27 @@ return () => clearInterval(interval)
         <div className="dashboard-card">
           <FaBell className="card-icon" />
 
-          <h2>{medicines.length}</h2>
+          <h2>
+            {
+              medicines.filter(
+                each => each.status === 'Pending',
+              ).length
+            }
+          </h2>
 
-          <p>Today's Reminders</p>
+          <p>Pending</p>
         </div>
 
         <div className="dashboard-card">
           <FaCheckCircle className="card-icon" />
 
           <h2>
-  {medicines.filter(each => each.status === 'Taken').length}
-</h2>
+            {
+              medicines.filter(
+                each => each.status === 'Taken',
+              ).length
+            }
+          </h2>
 
           <p>Completed</p>
         </div>
@@ -202,12 +205,13 @@ return () => clearInterval(interval)
         <h2>Today's Schedule</h2>
 
         {medicines.length === 0 ? (
-          <p>No medicines added for today.</p>
+          <p>No medicines added.</p>
         ) : (
           <table>
             <thead>
               <tr>
                 <th>Medicine</th>
+                <th>Dosage</th>
                 <th>Time</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -219,32 +223,28 @@ return () => clearInterval(interval)
                 <tr key={each.id}>
                   <td>{each.name}</td>
 
+                  <td>{each.dosage}</td>
+
                   <td>{each.time}</td>
 
                   <td>
-                    {each.status === 'Taken' ? (
-                      <span className="taken-text">
-                        ✅ Taken
-                      </span>
-                    ) : (
-                      <span className="pending-text">
-                        ⏳ Pending
-                      </span>
-                    )}
+                    {each.status === 'Taken'
+                      ? '✅ Taken'
+                      : '⏳ Pending'}
                   </td>
 
                   <td>
                     {each.status === 'Pending' ? (
                       <button
                         className="taken-btn"
-                        onClick={() => onClickTaken(each.id)}
+                        onClick={() =>
+                          onClickTaken(each.id)
+                        }
                       >
                         Taken
                       </button>
                     ) : (
-                      <span className="done-text">
-                        ✔ Done
-                      </span>
+                      '✔ Done'
                     )}
                   </td>
                 </tr>
