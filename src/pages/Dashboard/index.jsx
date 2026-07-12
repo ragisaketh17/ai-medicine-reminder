@@ -57,11 +57,17 @@ const Dashboard = () => {
     medicineList.forEach(each => {
   const medicineMinutes = convertToMinutes(each.time)
 
+  console.log("Current Minutes:", currentMinutes)
+  console.log("Medicine:", each.name)
+  console.log("Medicine Minutes:", medicineMinutes)
+  console.log("Status:", each.status)
+
   if (
     currentMinutes >= medicineMinutes &&
     each.status === 'Pending'
   ) {
-    // Start reminder
+    console.log("Reminder triggered for:", each.name)
+
     if (!each.reminderStartedAt) {
       each.reminderStartedAt = Date.now()
       each.reminderCount = 0
@@ -71,15 +77,15 @@ const Dashboard = () => {
 
     const elapsed = Date.now() - each.reminderStartedAt
 
-    // Stop after 1 minute
     if (elapsed <= 60000) {
-      // Reminder every 6 seconds
       const reminderIndex = Math.floor(elapsed / 6000)
 
       if (
         reminderIndex > each.lastReminder &&
         each.reminderCount < 10
       ) {
+        console.log("Sending Notification:", each.name)
+
         showNotification(each)
 
         each.reminderCount += 1
@@ -90,7 +96,6 @@ const Dashboard = () => {
     }
   }
 })
-
 if (updated) {
   localStorage.setItem(
     `medicines_${loggedInUser}`,
