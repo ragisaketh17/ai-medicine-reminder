@@ -85,7 +85,9 @@ const Dashboard = () => {
         each.reminderCount < 10
       ) {
         console.log("Sending Notification:", each.name)
-
+        console.log("Notification for:", each.name)
+        console.log("Current:", currentMinutes)
+        console.log("Medicine:", medicineMinutes)
         showNotification(each)
 
         each.reminderCount += 1
